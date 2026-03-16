@@ -1,5 +1,7 @@
 # 🚀 BussCon: Founder-Investor & Operations Analytics Platform
 
+**🌟 Live Demo:** [View the Platform Here](https://busscon-app.vercel.app)
+
 Welcome to **BussCon**, a full-stack web platform designed to seamlessly connect ambitious founders with strategic investors while also providing powerful operations analytics. 
 
 ## 📖 Overview
