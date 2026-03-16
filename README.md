@@ -37,4 +37,4 @@ BussCon acts as a bridge and a dashboard. For founders, it's a place to submit i
    ```
 
 ## 🌐 Deployment
-This project is configured to be deployed on [Vercel](https://vercel.com/prajyot-kordes-projects).
+This project is live! You can view the platform here: [BussCon Live App](https://busscon-app.vercel.app) (Hosted on Vercel).
