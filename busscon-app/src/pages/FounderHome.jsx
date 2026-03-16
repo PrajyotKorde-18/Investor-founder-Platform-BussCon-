@@ -1,0 +1,72 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Eye, Flame, FileText, CheckCircle } from 'lucide-react';
+
+const mockIdeas = [
+  { id: 1, title: 'HealthAI', domain: 'Healthcare', status: 'Published', views: 42, interestScore: 85 },
+  { id: 2, title: 'FinSmart Payments', domain: 'Fintech', status: 'Closed', views: 120, interestScore: 210 },
+];
+
+export default function FounderHome() {
+  const navigate = useNavigate();
+
+  return (
+    <div>
+      <header className="page-header">
+        <h1>Founder Operations Home</h1>
+        <p>Monitor your startup portfolio performance</p>
+      </header>
+
+      <div className="dashboard-grid">
+        <div className="metric-card">
+          <div className="metric-title"><FileText size={16} /> Total Ideas</div>
+          <div className="metric-value">2</div>
+        </div>
+        <div className="metric-card">
+          <div className="metric-title"><Eye size={16} /> Total Investor Views</div>
+          <div className="metric-value">162</div>
+        </div>
+        <div className="metric-card" style={{borderColor: 'var(--accent-color)'}}>
+          <div className="metric-title" style={{color: 'var(--accent-color)'}}><Flame size={16} /> Active Deals</div>
+          <div className="metric-value" style={{color: 'var(--accent-color)'}}>1</div>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2 style={{marginTop: 0, marginBottom: '1.5rem'}}>My Startup Ideas</h2>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Title</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Domain</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Status</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Views</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Interest Score</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {mockIdeas.map((idea) => (
+              <tr key={idea.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                <td style={{ padding: '1rem', color: '#fff', fontWeight: 500 }}>{idea.title}</td>
+                <td style={{ padding: '1rem' }}>{idea.domain}</td>
+                <td style={{ padding: '1rem' }}>
+                  <span className={`badge ${idea.status === 'Published' ? 'badge-success' : 'badge-warning'}`}>
+                    {idea.status}
+                  </span>
+                </td>
+                <td style={{ padding: '1rem' }}>{idea.views}</td>
+                <td style={{ padding: '1rem', color: 'var(--accent-color)', fontWeight: 'bold' }}>{idea.interestScore}</td>
+                <td style={{ padding: '1rem' }}>
+                  <button onClick={() => navigate(`/founder/idea/${idea.id}`)} className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                    View Analytics
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
