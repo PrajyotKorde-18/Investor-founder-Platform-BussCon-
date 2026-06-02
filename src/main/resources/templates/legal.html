@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Legal Support Module - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Renders appropriate sidebar based on context role -->
+    <div th:replace="~{fragments/navbar :: sidebar(${role}, 'legal')}"></div>
+
+    <div class="main-content" style="max-width: 800px; margin: 0 auto;">
+        <header class="page-header">
+            <h1>Legal Support Module</h1>
+            <p>Pre-approved templates for closing deals securely</p>
+        </header>
+
+        <div style="background: rgba(88, 166, 255, 0.1); border: 1px solid var(--accent-color); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; display: flex; gap: 1rem;">
+            <div style="font-size: 1.5rem; line-height: 1;">ℹ️</div>
+            <p style="margin: 0; color: #fff; font-size: 0.9rem;">
+                These automated templates are linked to the <strong>Term Sheet</strong> deal pipeline stage. 
+                When an investor moves a deal to Term Sheet, they are automatically prompted to use these standard forms, saving operational friction.
+            </p>
+        </div>
+
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+                <h3 style="margin: 0 0 0.25rem 0; color: #fff;">1. Mutual Non-Disclosure Agreement (NDA)</h3>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem;">Standard IP protection for discussing Idea details.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="alert('Downloading Mutual NDA Template...')">📥 Download</button>
+        </div>
+
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+                <h3 style="margin: 0 0 0.25rem 0; color: #fff;">2. Simple Term Sheet Outline</h3>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem;">Base template covering valuation, equity, and cap tables.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="alert('Downloading Shareholder Term Sheet Template...')">📥 Download</button>
+        </div>
+
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0 0 0.25rem 0; color: #fff;">3. Basic Shareholder Agreement</h3>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem;">Standardized board rights and clauses for Closed Won phase.</p>
+            </div>
+            <button class="btn btn-secondary" onclick="alert('Downloading Shareholder Agreement Template...')">📥 Download</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

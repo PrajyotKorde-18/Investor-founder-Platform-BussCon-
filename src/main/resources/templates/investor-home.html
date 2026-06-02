@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Investor Operations Dashboard - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    <div th:replace="~{fragments/navbar :: sidebar('investor', 'home')}"></div>
+
+    <div class="main-content">
+        <header class="page-header">
+            <h1>Investor Operations Dashboard</h1>
+            <p>Your Forma.ai style portfolio and pipeline overview</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-title">💼 Startups Contacted</div>
+                <div class="metric-value" th:text="${contactedCount}">20</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">📈 Response Rate</div>
+                <div class="metric-value" style="color: var(--success-color);" th:text="${responseRate}">40%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">🗂️ Deals in Setup</div>
+                <div class="metric-value" th:text="${dealsInSetup}">3</div>
+            </div>
+            <div class="metric-card" style="border-color: var(--accent-color);">
+                <div class="metric-title" style="color: var(--accent-color);">🎯 Avg Deal Size</div>
+                <div class="metric-value" style="color: var(--accent-color);" th:text="${avgDealSize}">$1.2M</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 2rem;">
+            <div class="chart-container" style="flex: 1 1 500px;">
+                <h3 style="margin-top: 0; color: var(--text-secondary); margin-bottom: 1.5rem;">Funding Stage Distribution</h3>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="pipelineFunnelChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container" style="flex: 1 1 300px;">
+                <h3 style="margin-top: 0; color: var(--text-secondary); margin-bottom: 1.5rem;">Portfolio Domain Heatmap</h3>
+                <div style="height: 250px; position: relative;">
+                    <canvas id="domainHeatmapChart"></canvas>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;" id="heatmap-legend">
+                    <!-- Legend generated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Render Pipeline Funnel Chart (Horizontal Bar Chart)
+        const funnelData = /*[[${funnel}]]*/ [];
+        const funnelLabels = funnelData.map(f => f.name);
+        const funnelValues = funnelData.map(f => f.value);
+
+        const ctxFunnel = document.getElementById('pipelineFunnelChart').getContext('2d');
+        new Chart(ctxFunnel, {
+            type: 'bar',
+            data: {
+                labels: funnelLabels,
+                datasets: [{
+                    label: 'Deals Count',
+                    data: funnelValues,
+                    backgroundColor: '#58a6ff',
+                    borderColor: '#58a6ff',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Makes the bar chart horizontal!
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { color: '#30363d' },
+                        ticks: { color: '#8b949e', font: { family: 'Inter' } }
+                    },
+                    y: {
+                        grid: { color: '#30363d' },
+                        ticks: { color: '#8b949e', font: { family: 'Inter' } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // 2. Render Portfolio Domain Heatmap (Pie / Doughnut Chart)
+        const heatmapData = /*[[${heatmap}]]*/ [];
+        const heatmapLabels = heatmapData.map(h => h.name);
+        const heatmapValues = heatmapData.map(h => h.value);
+        const colors = ['#58a6ff', '#2ea043', '#f85149', '#d29922', '#8c52ff'];
+
+        const ctxHeatmap = document.getElementById('domainHeatmapChart').getContext('2d');
+        new Chart(ctxHeatmap, {
+            type: 'doughnut',
+            data: {
+                labels: heatmapLabels,
+                datasets: [{
+                    data: heatmapValues,
+                    backgroundColor: colors.slice(0, heatmapLabels.length),
+                    borderColor: '#161b22',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Generate legend dynamically
+        const legendDiv = document.getElementById('heatmap-legend');
+        heatmapLabels.forEach((label, idx) => {
+            const color = colors[idx % colors.length];
+            legendDiv.innerHTML += `
+                <div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.85rem;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${color};"></div>
+                    <span style="color: var(--text-secondary);">${label}</span>
+                </div>
+            `;
+        });
+    });
+</script>
+
+</body>
+</html>

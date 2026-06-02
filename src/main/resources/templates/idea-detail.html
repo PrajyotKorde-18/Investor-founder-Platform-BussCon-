@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Startup Analytics - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Include easy-to-use Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    <div th:replace="~{fragments/navbar :: sidebar('founder', 'home')}"></div>
+
+    <div class="main-content">
+        <header class="page-header" style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/founder" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 50%; display: flex; text-decoration: none;">
+                ←
+            </a>
+            <div>
+                <h1 th:text="'Startup Analytics: ' + ${idea.title}">Startup Analytics</h1>
+                <p>Detailed engagement metrics and investor funnel</p>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-title">👁️ Total Views</div>
+                <div class="metric-value" th:text="${views}">22</div>
+            </div>
+            <div class="metric-card" style="border-color: var(--accent-color);">
+                <div class="metric-title" style="color: var(--accent-color);">📈 Interest Score</div>
+                <div class="metric-value" style="color: var(--accent-color);" th:text="${interestScore}">85</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">👥 Interested Investors</div>
+                <div class="metric-value" th:text="${interestedInvestors}">1</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">✅ Readiness Score</div>
+                <div class="metric-value" th:text="${readinessScore} + '%'">75%</div>
+            </div>
+        </div>
+
+        <div class="chart-container" style="margin-top: 2rem;">
+            <h3 style="margin-top: 0; color: #fff; margin-bottom: 1.5rem;">Interest & Engagement Trend</h3>
+            <div style="width: 100%; height: 300px; position: relative;">
+                <canvas id="engagementTrendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3 style="margin-top: 0;">Interested Investors Pipeline</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Investor Name</th>
+                        <th>Firm</th>
+                        <th>Connection Stage</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${interestedInvestors > 0}">
+                        <td style="color: #fff;">Sarah Jenkins</td>
+                        <td>Sequoia Capital</td>
+                        <td><span class="badge badge-warning">Meeting Scheduled</span></td>
+                        <td>
+                            <button class="btn" onclick="alert('Opening Sequoia Video Room... (Mocked)')" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                                Start Video Call
+                            </button>
+                        </td>
+                    </tr>
+                    <tr th:if="${interestedInvestors == 0}">
+                        <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                            No investors have added this idea to their pipeline yet. It will appear here once saved in deal discovery!
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        const trendData = /*[[${trend}]]*/ [];
+        
+        const labels = trendData.map(t => t.name);
+        const views = trendData.map(t => t.views);
+        const interest = trendData.map(t => t.interest);
+
+        const ctx = document.getElementById('engagementTrendChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Interest Score',
+                        data: interest,
+                        borderColor: '#58a6ff',
+                        backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Views',
+                        data: views,
+                        borderColor: '#8b949e',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        tension: 0.3,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        grid: { color: '#30363d' },
+                        ticks: { color: '#8b949e', font: { family: 'Inter' } }
+                    },
+                    x: {
+                        grid: { color: '#30363d' },
+                        ticks: { color: '#8b949e', font: { family: 'Inter' } }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#c9d1d9', font: { family: 'Inter', weight: '600' } }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

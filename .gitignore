@@ -21,3 +21,8 @@ dist-ssr/
 
 # Vite
 *.tsbuildinfo
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+

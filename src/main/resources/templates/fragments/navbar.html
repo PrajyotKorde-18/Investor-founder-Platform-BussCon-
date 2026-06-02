@@ -1,0 +1,42 @@
+<div th:fragment="sidebar(role, activeTab)" class="sidebar" xmlns:th="http://www.thymeleaf.org">
+    <div class="sidebar-brand">
+        <span>BussCon</span>
+    </div>
+    
+    <!-- Founder Navigation -->
+    <th:block th:if="${role == 'founder'}">
+        <a href="/founder" class="nav-link" th:classappend="${activeTab == 'home'} ? 'active' : ''">
+            <span class="nav-icon">📊</span> Operations Home
+        </a>
+        <a href="/founder/financials" class="nav-link" th:classappend="${activeTab == 'financials'} ? 'active' : ''">
+            <span class="nav-icon">📈</span> Financial Modeling
+        </a>
+    </th:block>
+
+    <!-- Investor Navigation -->
+    <th:block th:if="${role == 'investor'}">
+        <a href="/investor" class="nav-link" th:classappend="${activeTab == 'home'} ? 'active' : ''">
+            <span class="nav-icon">💼</span> Operations Dashboard
+        </a>
+        <a href="/investor/browse" class="nav-link" th:classappend="${activeTab == 'browse'} ? 'active' : ''">
+            <span class="nav-icon">🔍</span> Discovery Flow
+        </a>
+        <a href="/investor/pipeline" class="nav-link" th:classappend="${activeTab == 'pipeline'} ? 'active' : ''">
+            <span class="nav-icon">📋</span> Kanban Board
+        </a>
+        <a href="/investor/automation" class="nav-link" th:classappend="${activeTab == 'automation'} ? 'active' : ''">
+            <span class="nav-icon">⚙️</span> Rule Automations
+        </a>
+    </th:block>
+
+    <!-- Shared Navigation -->
+    <a href="/legal" class="nav-link" th:classappend="${activeTab == 'legal'} ? 'active' : ''">
+        <span class="nav-icon">⚖️</span> Legal Support
+    </a>
+    
+    <div style="margin-top: auto;">
+        <a href="/" class="nav-link" style="color: var(--danger-color);">
+            <span class="nav-icon">🚪</span> Logout
+        </a>
+    </div>
+</div>

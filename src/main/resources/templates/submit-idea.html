@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Submit Startup Idea - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-container">
+    <div th:replace="~{fragments/navbar :: sidebar('founder', 'home')}"></div>
+
+    <div class="main-content" style="max-width: 800px; margin: 0 auto;">
+        <header class="page-header">
+            <h1>Submit Startup Idea</h1>
+            <p>Your idea will be checked against our uniqueness database.</p>
+        </header>
+
+        <!-- Similarity Warning Alert (Hidden by default, shown by JS) -->
+        <div id="similarity-warning-box" style="display: none; background: rgba(218, 54, 51, 0.15); border: 1px solid var(--danger-color); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; gap: 1rem; align-items: flex-start;">
+            <div style="font-size: 1.5rem; line-height: 1;">🛡️</div>
+            <div>
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--danger-color);">Similarity Rule Violation (Backend Rule Engine)</h4>
+                <p id="warning-text" style="margin: 0; color: #fff; fontSize: 0.9rem;">
+                    We found a very similar published idea in the Fintech sector matching your keywords.
+                </p>
+                <button type="button" onclick="hideWarning()" class="btn btn-secondary" style="margin-top: 1rem;">I will revise it</button>
+                <button type="button" onclick="submitIdea(true)" class="btn" style="margin-top: 1rem; margin-left: 1rem; background: var(--danger-color);">Acknowledge Risk & Force Submit</button>
+            </div>
+        </div>
+
+        <div id="error-message" style="display: none; color: var(--danger-color); margin-bottom: 1rem;"></div>
+
+        <form id="submit-idea-form" class="card" onsubmit="handleFormSubmit(event)">
+            <div>
+                <label style="color: var(--text-secondary); display: block;">Idea Title</label>
+                <input type="text" id="title" required placeholder="e.g. NextGen Payments" />
+            </div>
+
+            <div>
+                <label style="color: var(--text-secondary); display: block;">Domain</label>
+                <select id="domain">
+                    <option value="Fintech">Fintech</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="SaaS">Enterprise SaaS</option>
+                    <option value="Consumer">Consumer App</option>
+                    <option value="AgriTech">AgriTech</option>
+                    <option value="Logistics">Logistics</option>
+                </select>
+            </div>
+
+            <div>
+               <label style="color: var(--text-secondary); display: block;">Keywords (comma separated)</label>
+               <input type="text" id="keywords" required placeholder="e.g. ai, payments, b2b" />
+               <small style="color: var(--text-secondary); display: block; margin-top: -1rem; margin-bottom: 1.5rem;">*Used by the analytics engine to compute uniqueness score</small>
+            </div>
+
+            <div>
+              <label style="color: var(--text-secondary); display: block;">Short Pitch (Visible to investors)</label>
+              <textarea id="shortDescription" required rows="4" placeholder="Describe the problem and solution..."></textarea>
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <span>📝 Run Uniqueness Check & Submit</span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        submitIdea(false);
+    }
+
+    function hideWarning() {
+        document.getElementById('similarity-warning-box').style.display = 'none';
+    }
+
+    async function submitIdea(force) {
+        const title = document.getElementById('title').value;
+        const domain = document.getElementById('domain').value;
+        const keywords = document.getElementById('keywords').value;
+        const shortDescription = document.getElementById('shortDescription').value;
+        const submitBtn = document.getElementById('submit-btn');
+        const errDiv = document.getElementById('error-message');
+
+        errDiv.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Processing Uniqueness Check...";
+
+        const payload = {
+            title,
+            domain,
+            shortDescription,
+            keywords
+        };
+
+        try {
+            const response = await fetch(`/api/ideas?force=${force}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.status === 409) {
+                const resData = await response.json();
+                document.getElementById('warning-text').innerHTML = `${resData.message}<br>To protect investor pipelines, please refine your idea's unique value proposition before submitting.`;
+                document.getElementById('similarity-warning-box').style.display = 'flex';
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Run Uniqueness Check & Submit";
+            } else if (!response.ok) {
+                throw new Error('Failed to submit startup idea.');
+            } else {
+                alert(force ? 'Force submitted successfully.' : 'Idea submitted successfully and passed uniqueness checks.');
+                window.location.href = '/founder';
+            }
+        } catch (err) {
+            errDiv.innerText = err.message;
+            errDiv.style.display = 'block';
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Run Uniqueness Check & Submit";
+        }
+    }
+</script>
+
+</body>
+</html>

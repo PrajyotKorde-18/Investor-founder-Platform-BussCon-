@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Startup Profile - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-container">
+    <div th:replace="~{fragments/navbar :: sidebar('investor', 'browse')}"></div>
+
+    <div class="main-content">
+        <header class="page-header" style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="/investor/browse" class="btn btn-secondary" style="padding: 0.5rem; border-radius: 50%; display: flex; text-decoration: none;">
+                    ←
+                </a>
+                <div>
+                    <h1 th:text="'Startup Profile: ' + ${idea.title}">Startup Profile</h1>
+                    <p th:text="'Full pitch and operations details (Interest Score: ' + ${idea.interestScore} + ')'">Full pitch and operations details</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="button" th:onclick="savePipeline([[${idea.id}]], [[${idea.title}]])" class="btn btn-secondary" style="display: flex; align-items: center; gap: 0.5rem;">
+                    🔖 Save to Pipeline
+                </button>
+                <button type="button" th:onclick="logAction([[${idea.id}]], 'MessageSent')" class="btn" style="display: flex; align-items: center; gap: 0.5rem;">
+                    💬 Request Connection
+                </button>
+            </div>
+        </header>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+            <div class="card">
+                <h2 style="color: #fff;">Detailed Description</h2>
+                <p style="color: var(--text-secondary); line-height: 1.6;" th:text="${idea.shortDescription}">
+                    Our startup is addressing a multi-billion dollar opportunity.
+                </p>
+                <p style="color: var(--text-secondary); line-height: 1.6;">
+                    This startup has passed all preliminary similarity checks. It has a high-quality product value proposition and operations analytics show strong momentum in the sector.
+                    <br /><br />
+                    <strong>Traction:</strong> 12 enterprise pilots running.<br />
+                    <strong>Revenue:</strong> $10k MRR <br />
+                    <strong>Runway:</strong> 6 Months
+                </p>
+
+                <h3 style="border-top: 1px solid var(--border-color); padding-top: 1.5rem; margin-top: 1.5rem; color: #fff;">Connected Actions</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" th:onclick="logAction([[${idea.id}]], 'MeetingScheduled')" class="btn" style="background: #2ea043; display: flex; align-items: center; gap: 0.5rem;">
+                        📹 Start Video Call Pitch
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="color: #fff; margin-top: 0;">Founder Bio</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    <strong>Jane Doe</strong><br />
+                    Ex-Google Engineer with 10 years experience building scalable enterprise architecture.
+                </p>
+                
+                <h3 style="border-top: 1px solid var(--border-color); padding-top: 1.5rem; color: #fff;">Funding Requirements</h3>
+                <ul style="color: var(--text-secondary); padding-left: 1.2rem; font-size: 0.9rem; line-height: 1.8;">
+                    <li><strong>Domain:</strong> <span th:text="${idea.domain}">Healthcare</span></li>
+                    <li><strong>Stage:</strong> <span th:text="${idea.stage}">Seed</span></li>
+                    <li><strong>Amount:</strong> <span th:text="${idea.funding}">$500k</span></li>
+                    <li><strong>Valuation:</strong> $<span th:text="${idea.preMoneyValuation.intValue() == 0 ? '5,000,000' : #numbers.formatDecimal(idea.preMoneyValuation, 0, 'COMMA', 0, 'POINT')}">5,000,000</span></li>
+                    <li><strong>Equity offered:</strong> <span th:text="${idea.incentivePoolPercent.intValue()} + '%'">15%</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function savePipeline(ideaId, title) {
+        try {
+            const response = await fetch('/api/pipeline', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ideaId, stage: 'contacted', founderName: 'Jane Doe' })
+            });
+
+            if (!response.ok) throw new Error('Failed to save to pipeline.');
+            alert(`Successfully saved '${title}' to your CRM Deal Pipeline Board!`);
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    async function logAction(ideaId, actionType) {
+        try {
+            const response = await fetch(`/api/ideas/${ideaId}/interactions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ actionType })
+            });
+
+            if (!response.ok) throw new Error('Failed to log interaction.');
+            
+            if (actionType === 'MeetingScheduled') {
+                alert("Opening Video Pitch Room! Logged interaction: 'MeetingScheduled' (+10 Interest Score Boost!)");
+            } else {
+                alert("Connection request sent! Logged interaction: 'MessageSent' (Boosted Interest Score!)");
+            }
+            window.location.reload(); // Reload to see the boosted interest score!
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+</script>
+
+</body>
+</html>

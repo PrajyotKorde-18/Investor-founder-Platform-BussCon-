@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Process Automation & Rule Builder - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-container">
+    <div th:replace="~{fragments/navbar :: sidebar('investor', 'automation')}"></div>
+
+    <div class="main-content">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Process Automation & Rule Builder</h1>
+                <p>Define logic to automatically execute deal flow operations</p>
+            </div>
+            <button onclick="runEngine()" id="run-engine-btn" class="btn" style="display: flex; align-items: center; gap: 0.5rem;">
+                ▶️ Run Rule Engine Now
+            </button>
+        </header>
+
+        <div style="background: rgba(35, 134, 54, 0.1); border: 1px solid var(--success-color); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; display: flex; gap: 1rem;">
+            <div style="font-size: 1.5rem; line-height: 1;">⚙️</div>
+            <p style="margin: 0; color: #fff; font-size: 0.9rem;">
+                <strong>Continuous Process Improvement:</strong> Use this rule builder to automate the manual operation of filtering and tagging startups. 
+                When a startup matches your rule criteria, the action triggers automatically, mirroring enterprise operations software.
+            </p>
+        </div>
+
+        <!-- Create Rule Form (Hidden by default, toggled by JS) -->
+        <form id="create-rule-form" class="card" style="display: none; border: 1px solid var(--accent-color); margin-bottom: 2rem;" onsubmit="handleCreateRule(event)">
+            <h3 style="margin-top: 0;">Create New Automation Rule</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <label style="display: block; color: var(--text-secondary);">IF Field</label>
+                    <select id="rule-if-field">
+                        <option value="Domain">Domain</option>
+                        <option value="Valuation">Valuation</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; color: var(--text-secondary);">Condition</label>
+                    <select id="rule-condition">
+                        <option value="Equals">Equals</option>
+                        <option value="Less Than">Less Than</option>
+                        <option value="Greater Than">Greater Than</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="display: block; color: var(--text-secondary);">Value</label>
+                    <input type="text" id="rule-value" required placeholder="e.g. Fintech or 2000000" style="margin-bottom: 0;" />
+                </div>
+                <div>
+                    <label style="display: block; color: var(--text-secondary);">THEN Action</label>
+                    <select id="rule-action">
+                        <option value="Tag as High Priority">Tag as High Priority (+50 score)</option>
+                        <option value="Add to Pipeline (Contacted)">Add to Pipeline (Contacted stage)</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn">Save Rule</button>
+                <button type="button" onclick="toggleForm(false)" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+
+        <div class="card">
+            <h3 style="display: flex; justify-content: space-between; align-items: center; margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+                Automated Pipeline Rules
+                <button onclick="toggleForm(true)" class="btn btn-secondary" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
+                    ➕ New Rule
+                </button>
+            </h3>
+
+            <div th:each="rule : ${rules}" 
+                 style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--border-color);"
+                 th:styleappend="${rule.active} ? '' : 'background: rgba(0,0,0,0.2);'">
+                
+                <div style="display: flex; align-items: center; gap: 1rem; flex: 1;" th:styleappend="${rule.active} ? '' : 'opacity: 0.5;'">
+                    <div style="background: var(--panel-bg); padding: 0.5rem 1rem; border-radius: 4px; border: 1px solid var(--border-color);">
+                        <span style="color: var(--accent-color); font-weight: bold;">IF</span> <span th:text="${rule.ifField}">Domain</span>
+                    </div>
+                    
+                    <div style="color: var(--text-secondary);" th:text="${rule.condition}">Equals</div>
+                    
+                    <div style="background: var(--bg-color); padding: 0.5rem 1rem; border-radius: 4px; border: 1px solid var(--accent-color); color: #fff;" th:text="'&quot;' + ${rule.value} + '&quot;'">
+                        "Fintech"
+                    </div>
+                    
+                    <div style="color: var(--success-color); font-weight: bold; margin: 0 1rem;">THEN</div>
+                    
+                    <div style="background: var(--panel-bg); padding: 0.5rem 1rem; border-radius: 4px; border: 1px solid var(--border-color);" th:text="${rule.thenAction}">
+                        Tag as High Priority
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 0.85rem; font-weight: bold;" 
+                          th:styleappend="${rule.active} ? 'color: var(--success-color);' : 'color: var(--text-secondary);'" 
+                          th:text="${rule.active} ? 'ACTIVE' : 'PAUSED'">ACTIVE</span>
+                    
+                    <button type="button" 
+                            th:onclick="toggleRule([[${rule.id}]])"
+                            style="background: transparent; border: 1px solid var(--border-color); color: #fff; cursor: pointer; padding: 0.4rem 0.8rem; border-radius: 4px; font-weight: bold;"
+                            th:text="${rule.active} ? 'Pause' : 'Activate'">Pause</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Terminal Console Logs (Hidden by default, shown by JS after run) -->
+        <div id="console-card" class="card" style="display: none; margin-top: 2rem; background: #0d1117; border: 1px solid #30363d;">
+            <h3 style="margin-top: 0; color: var(--accent-color); font-family: monospace;">Rule Engine Console Output</h3>
+            <div id="console-logs" style="max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 4px; font-family: monospace; font-size: 0.85rem;">
+                <!-- Logs populated by JS -->
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function toggleForm(show) {
+        document.getElementById('create-rule-form').style.display = show ? 'block' : 'none';
+    }
+
+    async function toggleRule(id) {
+        try {
+            const response = await fetch(`/api/automation/rules/${id}/toggle`, {
+                method: 'PUT'
+            });
+            if (!response.ok) throw new Error('Failed to toggle rule state.');
+            window.location.reload(); // Reload Thymeleaf templates to refresh switches!
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    async function handleCreateRule(e) {
+        e.preventDefault();
+        const ifField = document.getElementById('rule-if-field').value;
+        const condition = document.getElementById('rule-condition').value;
+        const value = document.getElementById('rule-value').value;
+        const thenAction = document.getElementById('rule-action').value;
+
+        try {
+            const response = await fetch('/api/automation/rules', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ifField, condition, value, thenAction, active: true })
+            });
+
+            if (!response.ok) throw new Error('Failed to create new rule.');
+            window.location.reload();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    async function runEngine() {
+        const btn = document.getElementById('run-engine-btn');
+        btn.disabled = true;
+        btn.innerText = "Running Engine...";
+
+        try {
+            const response = await fetch('/api/automation/run', { method: 'POST' });
+            if (!response.ok) throw new Error('Engine execution failed.');
+
+            const res = await response.json();
+            
+            // Render logs in terminal
+            const consoleDiv = document.getElementById('console-card');
+            const logsDiv = document.getElementById('console-logs');
+            logsDiv.innerHTML = '';
+            
+            res.logs.forEach(log => {
+                logsDiv.innerHTML += `<div style="color: ${log.includes('triggered') ? '#58a6ff' : '#2ea043'}; margin-bottom: 0.25rem;">&gt; ${log}</div>`;
+            });
+            
+            consoleDiv.style.display = 'block';
+            alert(`Success! Spring Boot Rule Engine completed.\n- Rules Triggered: ${res.rulesTriggered}\nCheck the console log feed below!`);
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "▶️ Run Rule Engine Now";
+        }
+    }
+</script>
+
+</body>
+</html>

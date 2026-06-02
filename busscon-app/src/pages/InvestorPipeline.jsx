@@ -1,87 +1,176 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { fetchPipelineBoard, updateDealStage } from '../utils/api';
+import { ChevronLeft, ChevronRight, RefreshCw, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const pipeline = {
-  contacted: [
-    { id: 101, title: 'HealthAI Scanner', founder: 'Dr. Jane Smith', days: 2 }
-  ],
-  meeting: [
-    { id: 102, title: 'FinSmart Payments', founder: 'Alex Chen', days: 5 }
-  ],
-  termSheet: [
-    { id: 103, title: 'Drone Delivery Logistics', founder: 'Sam Wilson', days: 14, amount: '$1.5M' }
-  ],
-  dueDiligence: [],
-  closed: [
-    { id: 104, title: 'AutoPilot Analytics', founder: 'Maria Garcia', days: 45, amount: '$2M' }
-  ]
+const STAGES = ['contacted', 'meeting', 'termSheet', 'dueDiligence', 'closed'];
+const STAGE_LABELS = {
+  contacted: 'Contacted',
+  meeting: 'Meeting Scheduled',
+  termSheet: 'Term Sheet',
+  dueDiligence: 'Due Diligence',
+  closed: 'Closed Won'
 };
 
 export default function InvestorPipeline() {
+  const navigate = useNavigate();
+  const [pipeline, setPipeline] = useState({
+    contacted: [],
+    meeting: [],
+    termSheet: [],
+    dueDiligence: [],
+    closed: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  async function loadPipeline() {
+    try {
+      setLoading(true);
+      const data = await fetchPipelineBoard();
+      
+      // Ensure all stages are present in the response
+      const sanitized = {
+        contacted: data.contacted || [],
+        meeting: data.meeting || [],
+        termSheet: data.termSheet || [],
+        dueDiligence: data.dueDiligence || [],
+        closed: data.closed || []
+      };
+      setPipeline(sanitized);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadPipeline();
+  }, []);
+
+  const handleMoveStage = async (dealId, currentStage, direction) => {
+    const currentIndex = STAGES.indexOf(currentStage);
+    let newIndex = currentIndex + direction;
+    if (newIndex < 0 || newIndex >= STAGES.length) return;
+
+    const newStage = STAGES[newIndex];
+    try {
+      await updateDealStage(dealId, newStage);
+      
+      // Local optimistic state update for instantaneous feedback
+      const movedDeal = pipeline[currentStage].find(d => d.id === dealId);
+      if (movedDeal) {
+        movedDeal.stage = newStage;
+        setPipeline({
+          ...pipeline,
+          [currentStage]: pipeline[currentStage].filter(d => d.id !== dealId),
+          [newStage]: [...(pipeline[newStage] || []), movedDeal]
+        });
+      }
+    } catch (err) {
+      alert('Failed to update stage: ' + err.message);
+      loadPipeline(); // Reload board state on failure
+    }
+  };
+
   return (
     <div>
-      <header className="page-header">
-        <h1>Investor Operations - Pipeline</h1>
-        <p>Manage your deal flow funnels dynamically like a CRM</p>
+      <header className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1>Investor Operations - Pipeline</h1>
+          <p>Manage your deal flow funnels dynamically like a CRM</p>
+        </div>
+        <button 
+          onClick={loadPipeline} 
+          className="btn btn-secondary" 
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <RefreshCw size={16} /> Refresh CRM
+        </button>
       </header>
 
-      <div className="kanban-board">
-        {/* Contacted Column */}
-        <div className="kanban-column">
-          <h3>Contacted <span className="badge">{pipeline.contacted.length}</span></h3>
-          {pipeline.contacted.map(deal => (
-            <div key={deal.id} className="kanban-card">
-              <h4>{deal.title}</h4>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>Founder: {deal.founder}</p>
-              <p style={{ fontSize: '0.75rem', color: '#da3633', margin: '0.5rem 0 0 0' }}>Stuck for {deal.days} days</p>
-            </div>
-          ))}
-        </div>
+      {loading && <p style={{ color: 'var(--text-secondary)' }}>Syncing CRM pipeline with database...</p>}
+      {error && <p style={{ color: 'var(--danger-color)' }}>Error: {error}</p>}
 
-        {/* Meeting Column */}
-        <div className="kanban-column">
-          <h3>Meeting Scheduled <span className="badge">{pipeline.meeting.length}</span></h3>
-          {pipeline.meeting.map(deal => (
-            <div key={deal.id} className="kanban-card" style={{ borderColor: 'var(--accent-color)' }}>
-              <h4>{deal.title}</h4>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>Founder: {deal.founder}</p>
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <span className="badge badge-warning">Awaiting Pitch Deck</span>
+      {!loading && !error && (
+        <div className="kanban-board">
+          {STAGES.map(stage => {
+            const deals = pipeline[stage] || [];
+            return (
+              <div key={stage} className="kanban-column">
+                <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {STAGE_LABELS[stage]} 
+                  <span className="badge">{deals.length}</span>
+                </h3>
+                
+                {deals.map(deal => (
+                  <div 
+                    key={deal.id} 
+                    className="kanban-card" 
+                    style={{ 
+                      borderColor: stage === 'meeting' ? 'var(--accent-color)' : 
+                                   stage === 'termSheet' ? 'var(--warning-color)' : 
+                                   stage === 'closed' ? 'var(--success-color)' : 'var(--border-color)',
+                      background: stage === 'closed' ? 'rgba(35, 134, 54, 0.1)' : 'var(--panel-bg)'
+                    }}
+                  >
+                    <h4 style={{ margin: '0 0 0.5rem 0', color: '#fff' }}>{deal.startupIdea?.title}</h4>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
+                      Founder: {deal.founderName || 'Jane Doe'}
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: deal.daysStuck > 7 ? 'var(--danger-color)' : 'var(--text-secondary)', margin: '0.5rem 0' }}>
+                      Stuck for {deal.daysStuck || 0} days
+                    </p>
+
+                    {deal.startupIdea?.funding && (
+                      <div className="deal-amount" style={{ fontWeight: 'bold', color: 'var(--success-color)', fontSize: '0.9rem', margin: '0.5rem 0' }}>
+                        {deal.startupIdea.funding} Asking
+                      </div>
+                    )}
+
+                    {stage === 'termSheet' && (
+                      <button 
+                        onClick={() => navigate('/legal')} 
+                        className="btn" 
+                        style={{ width: '100%', marginTop: '0.5rem', padding: '0.25rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}
+                      >
+                        <FileText size={12} /> Generate Legal Docs
+                      </button>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem' }}>
+                      <button 
+                        onClick={() => handleMoveStage(deal.id, stage, -1)}
+                        disabled={stage === 'contacted'}
+                        className="btn-secondary"
+                        style={{ padding: '2px 8px', borderRadius: '4px', cursor: stage === 'contacted' ? 'not-allowed' : 'pointer', opacity: stage === 'contacted' ? 0.3 : 1 }}
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleMoveStage(deal.id, stage, 1)}
+                        disabled={stage === 'closed'}
+                        className="btn-secondary"
+                        style={{ padding: '2px 8px', borderRadius: '4px', cursor: stage === 'closed' ? 'not-allowed' : 'pointer', opacity: stage === 'closed' ? 0.3 : 1 }}
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {deals.length === 0 && (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textAlign: 'center', marginTop: '2rem' }}>
+                    No deals
+                  </p>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-
-        {/* Term Sheet Column */}
-        <div className="kanban-column">
-          <h3>Term Sheet <span className="badge">{pipeline.termSheet.length}</span></h3>
-          {pipeline.termSheet.map(deal => (
-            <div key={deal.id} className="kanban-card" style={{ borderColor: 'var(--warning-color)' }}>
-              <h4>{deal.title}</h4>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>Founder: {deal.founder}</p>
-              <div className="deal-amount">{deal.amount}</div>
-              <button className="btn" style={{ width: '100%', marginTop: '0.5rem', padding: '0.25rem' }}>Generate Legal Docs</button>
-            </div>
-          ))}
-        </div>
-
-        {/* Due Diligence Column */}
-        <div className="kanban-column">
-          <h3>Due Diligence <span className="badge">0</span></h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textAlign: 'center', marginTop: '2rem' }}>Drag deals here</p>
-        </div>
-
-        {/* Closed Won Column */}
-        <div className="kanban-column">
-          <h3>Closed Won <span className="badge">{pipeline.closed.length}</span></h3>
-          {pipeline.closed.map(deal => (
-            <div key={deal.id} className="kanban-card" style={{ background: 'rgba(35, 134, 54, 0.1)', borderColor: 'var(--success-color)' }}>
-              <h4>{deal.title}</h4>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>Founder: {deal.founder}</p>
-              <div className="deal-amount">{deal.amount}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

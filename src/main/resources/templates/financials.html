@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Financial & Incentive Modelling - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+    <div th:replace="~{fragments/navbar :: sidebar('founder', 'financials')}"></div>
+
+    <div class="main-content">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Financial & Incentive Modelling</h1>
+                <p>Model your cap table and employee incentive compensation pool</p>
+            </div>
+            
+            <div th:if="${not ideas.isEmpty()}" style="display: flex; gap: 1rem; align-items: center;">
+                <label style="margin: 0; color: var(--text-secondary);">Select Idea:</label>
+                <select id="idea-selector" onchange="handleIdeaChange()" style="width: 220px; margin-bottom: 0;">
+                    <option th:each="i : ${ideas}" 
+                            th:value="${i.id}" 
+                            th:text="${i.title}" 
+                            th:selected="${i.id == selectedIdea.id}"></option>
+                </select>
+                <button type="button" onclick="saveScenario()" class="btn" style="display: flex; align-items: center; gap: 0.5rem;">
+                    💾 Save Scenario
+                </button>
+            </div>
+        </header>
+
+        <div th:if="${ideas.isEmpty()}">
+            <p style="color: var(--text-secondary);">Please submit a startup idea first to model financials.</p>
+        </div>
+
+        <div th:if="${not ideas.isEmpty()}">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0;">
+                        <span>🧮</span> Scenario Inputs
+                    </h3>
+                    
+                    <label style="display: block; color: var(--text-secondary); margin-top: '1rem';">Pre-Money Valuation ($)</label>
+                    <input 
+                        type="number" 
+                        id="valuation-input" 
+                        th:value="${selectedIdea.preMoneyValuation.intValue()}" 
+                        oninput="recalculate()"
+                        style="margin-bottom: 1rem;"
+                    />
+
+                    <label style="display: block; color: var(--text-secondary);">Target Raise Amount ($)</label>
+                    <input 
+                        type="number" 
+                        id="raise-input" 
+                        th:value="${selectedIdea.raiseAmount.intValue()}" 
+                        oninput="recalculate()"
+                        style="margin-bottom: 1rem;"
+                    />
+
+                    <label style="display: block; color: var(--text-secondary);">Employee Incentive Comp Pool (%)</label>
+                    <input 
+                        type="number" 
+                        id="incentive-input" 
+                        th:value="${selectedIdea.incentivePoolPercent.intValue()}" 
+                        oninput="recalculate()"
+                        style="margin-bottom: 1rem;"
+                    />
+                </div>
+
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0; margin-bottom: 2rem;">
+                        <span>💵</span> Financial Model Outputs
+                    </h3>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        <span style="color: var(--text-secondary);">Post-Money Valuation</span>
+                        <span style="font-weight: bold; color: #fff;" id="post-money-val">$0</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        <span style="color: var(--text-secondary);">Investor Equity</span>
+                        <span style="font-weight: bold; color: var(--accent-color);" id="investor-equity-pct">0%</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.5rem; background: rgba(210, 153, 34, 0.1); padding: 1rem; border-radius: 8px; border: 1px solid var(--warning-color);">
+                        <span style="color: var(--warning-color); font-weight: bold;">Total Incentive Comp Value</span>
+                        <span style="font-weight: bold; color: var(--warning-color);" id="incentive-comp-val">$0</span>
+                    </div>
+                    <small style="color: var(--text-secondary);">* This pool is used to model performance stock options for early hires, mirroring sales incentive plan design.</small>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0; color: #fff; margin-bottom: 1.5rem;">
+                    <span>📊</span> Cap Table Distribution
+                </h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: center;">
+                    <div style="flex: 1 1 300px; height: 250px; position: relative;">
+                        <canvas id="capTableChart"></canvas>
+                    </div>
+                    
+                    <div style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 16px; height: 16px; border-radius: 4px; background-color: #58a6ff;"></div>
+                            <div style="flex: 1;">
+                                <div style="color: var(--text-primary); font-weight: bold;">Founder Shares</div>
+                                <div style="color: var(--text-secondary); font-size: 0.85rem;" id="founder-legend-pct">0%</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 16px; height: 16px; border-radius: 4px; background-color: #2ea043;"></div>
+                            <div style="flex: 1;">
+                                <div style="color: var(--text-primary); font-weight: bold;">Investor Shares</div>
+                                <div style="color: var(--text-secondary); font-size: 0.85rem;" id="investor-legend-pct">0%</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 16px; height: 16px; border-radius: 4px; background-color: #d29922;"></div>
+                            <div style="flex: 1;">
+                                <div style="color: var(--text-primary); font-weight: bold;">Incentive Comp Pool</div>
+                                <div style="color: var(--text-secondary); font-size: 0.85rem;" id="incentive-legend-pct">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let chartInstance = null;
+
+    function handleIdeaChange() {
+        const id = document.getElementById('idea-selector').value;
+        window.location.href = `/founder/financials?ideaId=${id}`;
+    }
+
+    function recalculate() {
+        const valInput = Number(document.getElementById('valuation-input').value);
+        const raiseInput = Number(document.getElementById('raise-input').value);
+        const incInput = Number(document.getElementById('incentive-input').value);
+
+        const postMoney = valInput + raiseInput;
+        const investorEq = postMoney > 0 ? (raiseInput / postMoney) * 100 : 0;
+        const founderEq = Math.max(0, 100 - investorEq - incInput);
+        const incentiveValue = postMoney * (incInput / 100);
+
+        // Update view texts
+        document.getElementById('post-money-val').innerText = `$${postMoney.toLocaleString()}`;
+        document.getElementById('investor-equity-pct').innerText = `${investorEq.toFixed(2)}%`;
+        document.getElementById('incentive-comp-val').innerText = `$${incentiveValue.toLocaleString()}`;
+
+        document.getElementById('founder-legend-pct').innerText = `${founderEq.toFixed(1)}%`;
+        document.getElementById('investor-legend-pct').innerText = `${investorEq.toFixed(1)}%`;
+        document.getElementById('incentive-legend-pct').innerText = `${incInput.toFixed(1)}%`;
+
+        // Update Pie Chart
+        updateChart([founderEq, investorEq, incInput]);
+    }
+
+    function updateChart(dataValues) {
+        const ctx = document.getElementById('capTableChart').getContext('2d');
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Founder Shares', 'Investor Shares', 'Incentive Comp Pool'],
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: ['#58a6ff', '#2ea043', '#d29922'],
+                    borderColor: '#161b22',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    async function saveScenario() {
+        const ideaId = document.getElementById('idea-selector').value;
+        const valuation = Number(document.getElementById('valuation-input').value);
+        const raiseAmount = Number(document.getElementById('raise-input').value);
+        const incentivePoolPercent = Number(document.getElementById('incentive-input').value);
+
+        try {
+            const response = await fetch(`/api/ideas/${ideaId}/financials`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preMoneyValuation: valuation, raiseAmount, incentivePoolPercent })
+            });
+
+            if (!response.ok) throw new Error('Failed to save financial scenario.');
+            alert('Scenario successfully saved to Spring Boot database!');
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (document.getElementById('valuation-input')) {
+            recalculate();
+        }
+    });
+</script>
+
+</body>
+</html>

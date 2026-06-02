@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+
+    <div style="text-align: center; max-width: 600px; width: 100%; padding: 1rem;">
+        <div style="text-align: center; marginBottom: 3rem;">
+            <h1 style="font-size: 3rem; color: #fff; margin-bottom: 0.5rem;">BussCon</h1>
+            <p style="color: var(--accent-color); font-size: 1.2rem; margin-top: 0;">Founder–Investor & Operations Analytics Platform</p>
+        </div>
+
+        <div style="background: var(--panel-bg); padding: 2rem; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin-top: 2rem;">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #fff;">Select Role to Demo</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                
+                <a href="/founder" 
+                   style="padding: 2rem; display: flex; flex-direction: column; align-items: center; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; color: var(--text-primary); text-decoration: none;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">👤</div>
+                    <span style="font-size: 1.2rem; font-weight: 600; color: #fff;">Founder</span>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: center;">Submit ideas & track analytics</span>
+                </a>
+
+                <a href="/investor" 
+                   style="padding: 2rem; display: flex; flex-direction: column; align-items: center; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s; color: var(--text-primary); text-decoration: none;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💼</div>
+                    <span style="font-size: 1.2rem; font-weight: 600; color: #fff;">Investor</span>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: center;">Browse deals & pipeline operations</span>
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

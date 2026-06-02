@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Deal Flow Discovery - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-container">
+    <div th:replace="~{fragments/navbar :: sidebar('investor', 'browse')}"></div>
+
+    <div class="main-content">
+        <form id="filter-form" method="GET" action="/investor/browse">
+            <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1>Deal Flow Discovery</h1>
+                    <p>Browse curated startups that match your investment profile</p>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <!-- Search input -->
+                    <div style="position: relative;">
+                        <span style="position: absolute; top: 14px; left: 10px; color: var(--text-secondary);">🔍</span>
+                        <input type="text" 
+                               name="query"
+                               th:value="${query}"
+                               placeholder="Search keywords..." 
+                               onchange="this.form.submit()"
+                               style="padding-left: 2rem; width: 250px; margin-bottom: 0;" />
+                    </div>
+                    <!-- Domain select dropdown -->
+                    <select name="domain" onchange="this.form.submit()" style="width: 150px; margin-bottom: 0;">
+                        <option value="All" th:selected="${domain == 'All'}">All Domains</option>
+                        <option value="Healthcare" th:selected="${domain == 'Healthcare'}">Healthcare</option>
+                        <option value="Fintech" th:selected="${domain == 'Fintech'}">Fintech</option>
+                        <option value="AgriTech" th:selected="${domain == 'AgriTech'}">AgriTech</option>
+                        <option value="Logistics" th:selected="${domain == 'Logistics'}">Logistics</option>
+                        <option value="SaaS" th:selected="${domain == 'SaaS'}">SaaS</option>
+                    </select>
+                </div>
+            </header>
+        </form>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            <div th:each="idea : ${ideas}" class="card" style="display: flex; flex-direction: column; transition: border-color 0.2s; border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: #fff;" th:text="${idea.title}">HealthAI Scanner</h3>
+                    <span class="badge badge-success" th:text="${idea.interestScore} + ' AI Match Score'">85 AI Match Score</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; flex: 1;" th:text="${idea.shortDescription}">AI-powered MRI scan analysis for early detection</p>
+                
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <span class="badge" th:text="${idea.domain}">Healthcare</span>
+                    <span class="badge" th:text="${idea.stage}">Seed</span>
+                    <span class="badge" th:text="${idea.location}">Boston</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <div>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); display: block;">Asking</span>
+                        <span style="font-weight: bold; color: var(--success-color);" th:text="${idea.funding}">$500k</span>
+                    </div>
+                    <a th:href="@{/investor/idea/{id}(id=${idea.id})}" class="btn" style="font-size: 0.85rem; text-decoration: none;">
+                        Deep Dive Int. Log
+                    </a>
+                </div>
+            </div>
+            
+            <div th:if="${ideas.isEmpty()}" style="grid-column: 1 / -1;">
+                <p style="color: var(--text-secondary);">No startups found matching your filter criteria.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

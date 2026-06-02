@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import FounderDashboard from '../components/FounderDashboard';
 import { ArrowLeft } from 'lucide-react';
+import { fetchIdeaById } from '../utils/api';
 
 export default function FounderIdeaDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [idea, setIdea] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadIdea() {
+      try {
+        setLoading(true);
+        const data = await fetchIdeaById(id);
+        setIdea(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadIdea();
+  }, [id]);
 
   return (
     <div>
@@ -14,12 +32,12 @@ export default function FounderIdeaDetail() {
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 style={{ marginBottom: 0 }}>Startup Analytics: Idea #{id}</h1>
+          <h1 style={{ marginBottom: 0 }}>Startup Analytics: {idea ? idea.title : `Idea #${id}`}</h1>
           <p style={{ marginTop: '0.25rem' }}>Detailed engagement metrics and investor funnel</p>
         </div>
       </header>
 
-      <FounderDashboard />
+      <FounderDashboard ideaId={Number(id)} />
       
       <div className="card" style={{ marginTop: '2rem' }}>
         <h3 style={{ marginTop: 0 }}>Interested Investors Pipeline</h3>
@@ -38,7 +56,7 @@ export default function FounderIdeaDetail() {
               <td style={{ padding: '1rem' }}>Sequoia Capital</td>
               <td style={{ padding: '1rem' }}><span className="badge badge-warning">Meeting Requested</span></td>
               <td style={{ padding: '1rem' }}>
-                <button className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>Start Video Call</button>
+                <button className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={() => alert('Opening Sequoia Video Room... (Mocked)')}>Start Video Call</button>
               </td>
             </tr>
           </tbody>

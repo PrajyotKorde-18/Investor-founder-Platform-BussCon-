@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Founder Operations Home - BussCon</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Sidebar navigation fragment -->
+    <div th:replace="~{fragments/navbar :: sidebar('founder', 'home')}"></div>
+
+    <div class="main-content">
+        <header class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>Founder Operations Home</h1>
+                <p>Monitor your startup portfolio performance</p>
+            </div>
+            <a href="/founder/submit" class="btn">Submit Startup Idea</a>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-title">📄 Total Ideas</div>
+                <div class="metric-value" th:text="${ideas.size()}">2</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-title">👁️ Total Investor Views</div>
+                <div class="metric-value" th:text="${totalViews}">162</div>
+            </div>
+            <div class="metric-card" style="border-color: var(--accent-color);">
+                <div class="metric-title" style="color: var(--accent-color);">🔥 Active Deals</div>
+                <div class="metric-value" style="color: var(--accent-color);" th:text="${activeDeals}">1</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-top: 0; margin-bottom: 1.5rem;">My Startup Ideas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Domain</th>
+                        <th>Status</th>
+                        <th>Views</th>
+                        <th>Interest Score</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="idea : ${ideas}">
+                        <td style="color: #fff; font-weight: 500;" th:text="${idea.title}">HealthAI Scanner</td>
+                        <td th:text="${idea.domain}">Healthcare</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${idea.status == 'Published'} ? 'badge-success' : 'badge-warning'" 
+                                  th:text="${idea.status}">Published</span>
+                        </td>
+                        <td th:text="${idea.views}">42</td>
+                        <td style="color: var(--accent-color); font-weight: bold;" th:text="${idea.interestScore}">85</td>
+                        <td>
+                            <a th:href="@{/founder/idea/{id}(id=${idea.id})}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                                View Analytics
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${ideas.isEmpty()}">
+                        <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+                            You haven't submitted any startup ideas yet. Click the button above to submit your first idea!
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
