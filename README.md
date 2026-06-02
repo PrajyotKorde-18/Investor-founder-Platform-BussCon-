@@ -1,6 +1,8 @@
 # 🚀 BussCon: Founder-Investor & Operations Analytics Platform
 
-**🌟 Live Demo:** [View the Platform Here](https://busscon-app.vercel.app)
+**🌟 Live Links:**
+* **Frontend (Vercel):** [BussCon Live App](https://busscon-app.vercel.app)
+* **Backend API (Render):** [BussCon Backend](https://investor-founder-platform-busscon.onrender.com)
 
 Welcome to **BussCon**, a full-stack web platform designed to seamlessly connect ambitious founders with strategic investors while also providing powerful operations analytics.
 
@@ -119,5 +121,7 @@ Make sure you have **Java 22 (or higher)** and **Node.js (v18+ recommended)** in
 ---
 
 ## 🌐 Deployment
-This project is live! You can view the platform here: [BussCon Live App](https://busscon-app.vercel.app) (Hosted on Vercel).
+This project is live in production!
+* **Frontend Application:** Hosted on Vercel at [https://busscon-app.vercel.app](https://busscon-app.vercel.app)
+* **Backend Services:** Hosted on Render at [https://investor-founder-platform-busscon.onrender.com](https://investor-founder-platform-busscon.onrender.com)
 
