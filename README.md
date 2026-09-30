@@ -1,127 +1,107 @@
-# 🚀 BussCon: Founder-Investor & Operations Analytics Platform
+# BussCon
 
-**🌟 Live Links:**
-* **Frontend (Vercel):** [BussCon Live App](https://busscon-app.vercel.app)
-* **Backend API (Render):** [BussCon Backend](https://investor-founder-platform-busscon.onrender.com)
+**A platform where founders pitch ideas and investors track them through a deal pipeline.**
 
-Welcome to **BussCon**, a full-stack web platform designed to seamlessly connect ambitious founders with strategic investors while also providing powerful operations analytics.
+I wanted to build something with two sides: founders who need to get an idea in front of the right people, and investors who need a structured way to evaluate what they find. BussCon is a full-stack app with a Spring Boot backend and a React frontend that covers both.
 
-This project is now a **full-stack architecture** consisting of a robust **Java Spring Boot backend** with built-in Thymeleaf templating and an **interactive React (Vite) frontend**.
+**Live demo:** [busscon-app.vercel.app](https://busscon-app.vercel.app)
+The backend runs on Render, so the first request after a quiet period can take a little while to wake up.
 
----
-
-## 📖 Overview
-BussCon acts as a bridge and a dashboard. For founders, it's a place to submit innovative ideas, receive uniqueness checks, and find the right investors. For investors, it offers a streamlined pipeline to discover, evaluate, and connect with promising startups. It also includes comprehensive analytics and reporting tools to support operational excellence.
+<!-- Add a screenshot or GIF here: docs/dashboard.png -->
 
 ---
 
-## ✨ Key Features
+## What it does
 
-### 💻 Frontend (React & CSS)
-* **Interactive Dashboards:** Stunning modern charts, metrics, and micro-interactions for both founders and investors.
-* **Founder Financials Hub:** Track funding requirements, monthly runway, cash burn, and project future financials dynamically.
-* **Investor Pipeline:** Visual, interactive deal flow board with drag-and-drop capabilities to move startups through stages (Discovery, Diligence, Proposal, Funded).
-* **Smart Matching:** Discovery interface to search and filter startup ideas by industry, funding requirements, and uniqueness scores.
+**For founders**
+- Submit a startup idea with a category, and get a uniqueness score back
+- Track funding needs, monthly runway and cash burn in a financials view
 
-### ⚙️ Backend (Spring Boot & JPA)
-* **Idea Management REST API:** Robust CRUD controllers for startup idea submissions, complete with category classification and uniqueness rating calculation.
-* **Deal Flow Pipeline API:** Backend endpoints for adding notes, tracking pipeline milestones, updating stages, and recording interactive touchpoints.
-* **Investment Automation:** Rules engine enabling auto-approval, automatic notification alerts, or automated pipeline updates when deals match specified criteria.
-* **Operational Analytics & Analytics REST API:** Real-time data aggregation to serve total statistics (e.g., funding amounts, top sectors, monthly sign-ups, engagement ratios).
-* **Multi-View Thymeleaf Interface:** Integrated server-side templating supporting standard web requests.
+**For investors**
+- Browse and filter startup ideas by industry, funding requirement and uniqueness score
+- Move startups through a deal board: Discovery, Diligence, Proposal, Funded
+- Add notes and record touchpoints on each deal
+- Set rules that automate pipeline updates or notifications when a deal matches your criteria
 
----
+**For everyone**
+- Analytics dashboard with total funding, top sectors, monthly sign-ups and engagement
 
-## 🛠️ Technology Stack
+**Built with:** Java 22, Spring Boot 3.3, Spring Data JPA, H2, Thymeleaf, React (Vite), Lucide icons, Maven
 
-| Layer | Technologies Used |
-| :--- | :--- |
-| **Backend Core** | Java 22, Spring Boot 3.3.0 |
-| **Database & Persistence** | Spring Data JPA, H2 Database (In-Memory) |
-| **Server-Side UI** | Thymeleaf, HTML5, CSS3 |
-| **Frontend UI** | React (Vite), Modern CSS Grid & Flexbox, Lucide React (Icons) |
-| **APIs** | RESTful Web Services, JSON, CORS-Enabled Configurations |
-| **Build Tools** | Maven, npm / Vite |
+## How it's built
 
----
+| Part | What it is |
+|---|---|
+| **Backend (root)** | Spring Boot REST API with controllers for ideas, the deal pipeline, automation rules and analytics. Data is stored through Spring Data JPA. |
+| **busscon-app/** | React frontend built with Vite. It talks to the API over JSON, with CORS configured for it. |
+| **Thymeleaf views** | Server-rendered pages served by the same Spring Boot app. |
 
-## 📂 Directory Structure
-
-```bash
+```
 Investor-founder-Platform-BussCon-/
-├── .mvn/                     # Maven Wrapper directory
-├── mvnw / mvnw.cmd           # Maven Wrapper executable scripts
-├── pom.xml                   # Root Maven configuration (dependencies & plugins)
-├── src/                      # Java Spring Boot backend source code
-│   ├── main/
-│   │   ├── java/com/busscon/ # Backend Controller, Model, Repository & Config files
-│   │   └── resources/
-│   │       ├── templates/    # Server-Side Thymeleaf template pages
-│   │       └── static/       # Static assets (custom CSS, JS, Images)
-│   └── test/                 # JUnit & MockMvc automated tests
-│
-└── busscon-app/              # React frontend workspace (Vite)
-    ├── src/                  # React components, pages, utils, and assets
-    ├── package.json          # Node dependencies & scripts
-    └── vite.config.ts        # Vite compilation & proxy config
+├── pom.xml                   # Maven config
+├── mvnw / mvnw.cmd           # Maven wrapper
+├── src/
+│   ├── main/java/com/busscon/   # Controllers, models, repositories, config
+│   ├── main/resources/
+│   │   ├── templates/           # Thymeleaf pages
+│   │   └── static/              # CSS, JS, images
+│   └── test/                    # JUnit and MockMvc tests
+└── busscon-app/              # React frontend
+    ├── src/                     # Components, pages, utils
+    ├── package.json
+    └── vite.config.ts           # Dev server and API proxy
 ```
 
----
+## Run it locally
 
-## 🚀 Getting Started Locally
+You'll need Java 22+ and Node.js 18+.
 
-To run the full-stack system locally, you can spin up the Spring Boot backend and the React frontend concurrently.
+**1. Start the backend**
 
-### 1️⃣ Prerequisite
-Make sure you have **Java 22 (or higher)** and **Node.js (v18+ recommended)** installed on your machine.
+```bash
+git clone https://github.com/PrajyotKorde-18/Investor-founder-Platform-BussCon-.git
+cd Investor-founder-Platform-BussCon-
 
----
+./mvnw spring-boot:run        # macOS / Linux (run chmod +x mvnw first)
+mvnw.cmd spring-boot:run      # Windows
+```
 
-### 2️⃣ Run the Spring Boot Backend
+The API starts at http://localhost:8080.
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/PrajyotKorde-18/Investor-founder-Platform-BussCon-.git
-   cd Investor-founder-Platform-BussCon-
-   ```
-2. **Build and start the Spring Boot app:**
-   * **On Windows (Command Prompt/PowerShell):**
-     ```cmd
-     mvnw.cmd spring-boot:run
-     ```
-   * **On macOS/Linux:**
-     ```bash
-     chmod +x mvnw
-     ./mvnw spring-boot:run
-     ```
-3. The server will launch at: `http://localhost:8080`
-   * **H2 Database Console:** Access the in-memory database at `http://localhost:8080/h2-console`
-     * **JDBC URL:** `jdbc:h2:mem:busscondb`
-     * **Username:** `sa`
-     * **Password:** *leave blank*
+The app uses an in-memory H2 database, so data resets on every restart. To inspect it, open http://localhost:8080/h2-console with:
 
----
+- JDBC URL: `jdbc:h2:mem:busscondb`
+- Username: `sa`
+- Password: leave blank
 
-### 3️⃣ Run the React Frontend
+**2. Start the frontend**
 
-1. **Navigate to the frontend directory:**
-   ```bash
-   cd busscon-app
-   ```
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-3. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-4. The frontend will launch at: `http://localhost:5173` (Vite config is pre-configured to proxy API requests to `http://localhost:8080`).
+```bash
+cd busscon-app
+npm install
+npm run dev
+```
 
----
+Open http://localhost:5173. Vite proxies API calls to port 8080.
 
-## 🌐 Deployment
-This project is live in production!
-* **Frontend Application:** Hosted on Vercel at [https://busscon-app.vercel.app](https://busscon-app.vercel.app)
-* **Backend Services:** Hosted on Render at [https://investor-founder-platform-busscon.onrender.com](https://investor-founder-platform-busscon.onrender.com)
+## Deployment
 
+- Frontend: Vercel
+- Backend: Render
+
+## What I learned
+
+- Keeping the backend and frontend in one repo made local setup simple, but deployment needed two separate pipelines
+- CORS and proxy settings are easy to get wrong until the frontend and backend run on different hosts
+- An in-memory database is great for fast development, but it needs a real database before anyone can depend on the data
+
+## Roadmap
+
+- [ ] Swap H2 for PostgreSQL so data persists
+- [ ] User authentication and separate founder and investor accounts
+- [ ] More test coverage on the pipeline and automation rules
+
+## Author
+
+**Prajyot Korde**, IT undergrad at Ramdeobaba University
+[LinkedIn](https://www.linkedin.com/in/prajyot-korde-912621281) · [GitHub](https://github.com/PrajyotKorde-18)
